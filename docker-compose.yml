@@ -1,0 +1,45 @@
+version: '3.1'
+services:
+  nginx:
+    image: nginx:1.21.6-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./app:/app
+      - ./site.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - php
+
+  php:
+    image: m7ammad/php
+    volumes:
+      - ./app:/app
+    links:
+      - db
+
+  db:
+    image: mysql:5.7.37
+#    restart: always
+    environment:
+      MYSQL_DATABASE: my_db
+      MYSQL_USER: my_db_username
+      MYSQL_PASSWORD: my_db_password
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - db:/var/lib/mysql
+    expose:
+      - "3306"
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "8090:80"
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=db
+      - PMA_USER=my_db_username
+      - PMA_PASSWORD=my_db_password
+
+volumes:
+  db:
